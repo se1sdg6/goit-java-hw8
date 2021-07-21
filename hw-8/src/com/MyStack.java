@@ -9,64 +9,78 @@ peek() возвращает первый элемент в стеке (LIFO)
 pop() возвращает первый элемент в стеке и удаляет его из коллекции
 */
 
-public class MyStack {
+import java.util.Objects;
+
+public class MyStack<E> {
     private int size;
 
-    private Node first;
-    private Node last;
+    private final int DEFAULT_SIZE = 10;
+    private Object[] elementData;
 
     public MyStack() {
+        elementData = new Object[DEFAULT_SIZE];
     }
 
-    public Object peek() {
-        return last;
+    public MyStack(int length) {
+        elementData = new Object[length];
     }
 
-    public Object pop() {
-        Node result = last;
-        if (first != last && last.prev != null) {
-            last = last.prev;
-        } else {
-            first = null;
-            last = null;
-        }
-        size--;
-
+    public E peek() {
+        Objects.checkIndex(0, size);
+        E result = size > 0 ? (E) elementData[size - 1] : null;
         return result;
     }
 
-    public void push(Object element) {
-        if (size == 0) {
-            first = new Node(null, element, null);
-            last = first;
-        } else {
-            Node item = new Node(last, element, null);
-            last.next = item;
-            last = item;
+    public E pop() {
+        Objects.checkIndex(0, size);
+        E result = size > 0 ? (E) elementData[size - 1] : null;
+        size--;
+        return result;
+    }
+
+    public boolean push(E e) {
+        try {
+            if (size < elementData.length) {
+                elementData[size] = e;
+            } else {
+
+                //Если места мало, создаем новый масив в два раза больше
+                Object[] newArray = new Object[elementData.length * 2];
+
+                //Копируем элементы со старого в новый
+                System.arraycopy(elementData, 0, newArray, 0, elementData.length);
+
+                //Меняем ссылку на масив элеметов на новосозданный
+                elementData = newArray;
+
+                //Вставляем элемент
+                elementData[size] = e;
+            }
+
+            //Инкрементируем счетчик размера
+            size++;
+        } catch (Exception exc) {
+            return false;
         }
-        size++;
+
+        return true;
     }
 
     public boolean remove(int index) {
-        if (0 <= index && index < size) {
-            Node item = first;
-            for (int i = 1; i <= index; i++) {
-                if (item.next != null) {
-                    item = item.next;
-                } else {
-                    item = null;
-                    break;
+        Objects.checkIndex(index, size);
+
+        try {
+            if (index == (size - 1)) {
+                size--;
+            } else if (0 <= index && index < size) {
+                for (int i = index; i < (size - 1); i++) {
+                    elementData[i] = elementData[i + 1];
                 }
+                size--;
+            } else {
+                return false;
             }
-
-            Node itemPrev = item.prev;
-            Node itemNext = item.next;
-
-            itemPrev.next = itemNext;
-            itemNext.prev = itemPrev;
-
-            size--;
-        } else {
+        } catch (Exception exc) {
             return false;
         }
 
@@ -74,8 +88,7 @@ public class MyStack {
     }
 
     public void clear() {
-        first = null;
-        last = null;
+        elementData = new Object[DEFAULT_SIZE];
         size = 0;
 
 //        Дальше, уборщик мусора сделает все сам.
@@ -83,17 +96,5 @@ public class MyStack {
 
     public int size() {
         return size;
-    }
-
-    private static class Node {
-        Object item;
-        Node prev;
-        Node next;
-
-        Node(Node prev, Object element, Node next) {
-            this.item = element;
-            this.next = next;
-            this.prev = prev;
-        }
     }
 }

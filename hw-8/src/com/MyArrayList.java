@@ -8,6 +8,8 @@ size() возвращает размер коллекции
 get(int index) возвращает элемент под индексом
 */
 
+import java.util.Objects;
+
 public class MyArrayList<E> {
     private static final int DEFAULT_CAPACITY = 10;
 
@@ -32,7 +34,7 @@ public class MyArrayList<E> {
         this.elementData = new Object[DEFAULT_CAPACITY];
     }
 
-    public boolean add(Object e) {
+    public boolean add(E e) {
         try {
             if (size < elementData.length) {
                 elementData[size] = e;
@@ -60,13 +62,16 @@ public class MyArrayList<E> {
         return true;
     }
 
-    public Object get(int index) {
-        return 0 <= index && index < size ? elementData[index] : null;
+    public E get(int index) {
+        Objects.checkIndex(index, size);
+        return (E) elementData[index];
     }
 
 
 //  Если индекс меньше индекса последнего элемента, то метод смещает все элементы на один влево, и декрементирует счетчик размера.
     public boolean remove(int index) {
+        Objects.checkIndex(index, size);
+
         try {
             if (index == (size - 1)) {
                 size--;
@@ -74,10 +79,10 @@ public class MyArrayList<E> {
                 for (int i = index; i < (size - 1); i++) {
                     elementData[i] = elementData[i + 1];
                 }
+                size--;
             } else {
                 return false;
             }
-            size--;
         } catch (Exception exc) {
             return false;
         }

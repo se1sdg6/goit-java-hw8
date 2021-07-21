@@ -8,7 +8,9 @@ size() возвращает размер коллекции
 get(int index) возвращает элемент под индексом
 */
 
-public class MyLinkedList {
+import java.util.Objects;
+
+public class MyLinkedList<E> {
     private int size;
 
     private Node first;
@@ -18,25 +20,26 @@ public class MyLinkedList {
     public MyLinkedList() {
     }
 
-    public Object get(int index) {
-        Node item = null;
+    public E get(int index) {
+        Objects.checkIndex(index, size);
+        Node node = null;
 
         if (0 <= index && index < size) {
-            item = first;
+            node = first;
             for (int i = 1; i <= index; i++) {
-                if (item.next != null) {
-                    item = item.next;
+                if (node.next != null) {
+                    node = node.next;
                 } else {
-                    item = null;
+                    node = null;
                     break;
                 }
             }
         }
 
-        return item;
+        return node != null ? (E)node.item : null;
     }
 
-    public void add(Object element) {
+    public void add(E element) {
         if (size == 0) {
             first = new Node(null, element, null);
             last = first;
@@ -51,20 +54,30 @@ public class MyLinkedList {
     public boolean remove(int index) {
         if (0 <= index && index < size) {
             Node item = first;
-            for (int i = 1; i <= index; i++) {
-                if (item.next != null) {
-                    item = item.next;
-                } else {
-                    item = null;
-                    break;
+            if (index == 0) {
+                first = first.next;
+                first.prev = null;
+            } else if (index == size - 1) {
+                last = last.prev;
+                last.next = null;
+            } else {
+                for (int i = 1; i <= index; i++) {
+                    if (item.next != null) {
+                        item = item.next;
+                    } else {
+                        item = null;
+                        break;
+                    }
+                }
+
+                if (item != null && item.prev != null && item.next != null) {
+                    Node itemPrev = item.prev;
+                    Node itemNext = item.next;
+
+                    itemPrev.next = itemNext;
+                    itemNext.prev = itemPrev;
                 }
             }
-
-            Node itemPrev = item.prev;
-            Node itemNext = item.next;
-
-            itemPrev.next = itemNext;
-            itemNext.prev = itemPrev;
 
             size--;
         } else {
@@ -86,12 +99,12 @@ public class MyLinkedList {
         return size;
     }
 
-    private static class Node {
-        Object item;
+    private static class Node<E> {
+        E item;
         Node next;
         Node prev;
 
-        Node(Node prev, Object element, Node next) {
+        Node(Node prev, E element, Node next) {
             this.item = element;
             this.next = next;
             this.prev = prev;

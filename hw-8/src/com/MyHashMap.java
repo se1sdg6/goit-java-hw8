@@ -10,7 +10,7 @@ clear() очищает коллекцию
 
 import java.util.Objects;
 
-public class MyHashMap {
+public class MyHashMap<K, V> {
     private int size;
 
     private Node first;
@@ -22,7 +22,7 @@ public class MyHashMap {
     public MyHashMap() {
     }
 
-    public void put(Object key, Object value) {
+    public void put(K key, V value) {
         if (!contains(key)) {
             if (size < keys.length) {
                 keys[size] = key;
@@ -59,13 +59,13 @@ public class MyHashMap {
         }
     }
 
-    public Object get(Object key) {
+    public V get(K key) {
         if (size > 0) {
             if (contains(key)) {
                 Node node = first;
                 while (node != null) {
                     if (node.key.equals(key)) {
-                        return node.value;
+                        return (V)node.value;
                     } else {
                         node = node.next;
                     }
@@ -76,12 +76,11 @@ public class MyHashMap {
         return null;
     }
 
-    public void remove(Object key) {
+    public void remove(K key) {
         if (contains(key) && size > 0) {
             if (first.key.equals(key)) {
                 first = first.next;
                 removeKey(key);
-                size--;
                 return;
             }
 
@@ -101,14 +100,13 @@ public class MyHashMap {
             }
 
             removeKey(key);
-            size--;
         }
     }
 
-    private void removeKey(Object value) {
+    private void removeKey(K key) {
         int index = 0;
         for (Object o : keys) {
-            if (o.equals(value)) {
+            if (o.equals(key)) {
                 break;
             } else {
                 index++;
@@ -121,9 +119,10 @@ public class MyHashMap {
                 keys[i] = keys[i + 1];
             }
         }
+        size--;
     }
 
-    public boolean contains(Object value) {
+    public boolean contains(K value) {
         if (size > 0) {
             for (Object key : keys) {
                 if (key != null) {
@@ -148,13 +147,13 @@ public class MyHashMap {
         keys = new Object[DEFAULT_SIZE];
     }
 
-    private static class Node {
+    private static class Node<K, V> {
         int hash;
-        Object key;
-        Object value;
+        K key;
+        V value;
         Node next;
 
-        Node(int hash, Object key, Object value, Node next) {
+        Node(int hash, K key, V value, Node next) {
             this.hash = hash;
             this.key = key;
             this.value = value;
@@ -172,44 +171,5 @@ public class MyHashMap {
 
             return value.equals(item.value);
         }
-    }
-
-    public static void main(String[] args) {
-        MyHashMap myHashMap = new MyHashMap();
-
-        myHashMap.put(0, "1");
-        myHashMap.put(1, "2");
-        myHashMap.put(2, "3");
-        myHashMap.put(3, "4");
-        myHashMap.put(2, "4");
-
-        myHashMap.remove(1);
-
-        System.out.println(myHashMap.get(0));
-        System.out.println(myHashMap.get(1));
-        System.out.println(myHashMap.get(2));
-        System.out.println(myHashMap.get(3));
-
-        myHashMap.remove(3);
-
-        System.out.println();
-        System.out.println();
-        System.out.println();
-
-        System.out.println(myHashMap.get(0));
-        System.out.println(myHashMap.get(1));
-        System.out.println(myHashMap.get(2));
-        System.out.println(myHashMap.get(3));
-
-        myHashMap.clear();
-
-        System.out.println();
-        System.out.println();
-        System.out.println();
-
-        System.out.println(myHashMap.get(0));
-        System.out.println(myHashMap.get(1));
-        System.out.println(myHashMap.get(2));
-        System.out.println(myHashMap.get(3));
     }
 }

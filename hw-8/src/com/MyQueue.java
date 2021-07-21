@@ -9,7 +9,9 @@ peek() возвращает первый элемент в очереди (FIFO)
 poll() возвращает первый элемент в очереди и удаляет его из коллекции
 */
 
-public class MyQueue {
+import java.util.Objects;
+
+public class MyQueue<E> {
     private int size;
 
     private Node first;
@@ -19,24 +21,30 @@ public class MyQueue {
     public MyQueue() {
     }
 
-    public Object peek() {
-        return first;
+    public E peek() {
+        Objects.checkIndex(0, size);
+        return first != null ? (E)first.item : null;
     }
 
-    public Object poll() {
-        Node result = first;
-        if (first != last && first.next != null) {
-            first = first.next;
-        } else {
-            first = null;
-            last = null;
+    public E poll() {
+        Objects.checkIndex(0, size);
+
+        E result = null;
+        if (size > 0 && first != null) {
+            result = (E)first.item;
+            if (first != last && first.next != null) {
+                first = first.next;
+            } else {
+                first = null;
+                last = null;
+            }
+            size--;
         }
-        size--;
 
         return result;
     }
 
-    public void add(Object element) {
+    public void add(E element) {
         if (size == 0) {
             first = new Node(null, element, null);
             last = first;
@@ -86,12 +94,12 @@ public class MyQueue {
         return size;
     }
 
-    private static class Node {
-        Object item;
+    private static class Node<E> {
+        E  item;
         Node next;
         Node prev;
 
-        Node(Node prev, Object element, Node next) {
+        Node(Node prev, E element, Node next) {
             this.item = element;
             this.next = next;
             this.prev = prev;
