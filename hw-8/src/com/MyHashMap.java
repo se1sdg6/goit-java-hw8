@@ -8,66 +8,86 @@ size() возвращает размер коллекции
 clear() очищает коллекцию
 */
 
-import java.util.Objects;
-
 public class MyHashMap<K, V> {
     private int size;
 
-    private Node first;
-    private Node last;
-
-    private final int DEFAULT_SIZE = 10;
-    private Object[] keys = new Object[DEFAULT_SIZE];
+    static final int DEFAULT_INITIAL_CAPACITY = 100;
+    private Node<K, V>[] table;
 
     public MyHashMap() {
+        table = (Node<K, V>[]) new Node[DEFAULT_INITIAL_CAPACITY];
     }
 
-    public void put(K key, V value) {
-        if (!contains(key)) {
-            if (size < keys.length) {
-                keys[size] = key;
-                if (size == 0) {
-                    first = new Node(Objects.hashCode(key), key, value, null);
-                    last = first;
-                } else {
-                    Node item = new Node(Objects.hashCode(key), key, value, null);
-                    last.next = item;
-                    last = item;
-                }
-            } else {
-                Object[] newArray = new Object[keys.length * 2];
-                System.arraycopy(keys, 0, newArray, 0, keys.length);
-                keys = newArray;
-                keys[size] = key;
+    public V put(K key, V value) {
 
-                Node item = new Node(Objects.hashCode(key), key, value, null);
-                last.next = item;
-                last = item;
-            }
+        if (key == null) {
+            putForNullKey(value);
+        }
 
+        int i = getIndex(key), hash = hash(key);
+        if (table[i] == null) {
+            table[i] = new Node<K, V>(hash, key, value, null);
             size++;
         } else {
-            Node node = first;
-            while(node != null) {
-                if (node.key.equals(key)) {
-                    node.value = value;
-                    break;
-                } else {
-                    node = node.next;
+            Node n; K k;
+            if (i == 0) {
+                if (table[i] == null) {
+                    n = new Node<>(hash, key, value, null);
+                    table[0] = new Node<>(hash(null), null, null, n);
+                    size++;
+                    return null;
+                }
+            }
+
+            for (n = table[i]; n != null; n = n.next) {
+                if (key == (k = (K) n.key) && key.equals(k)) {
+                    V oldValue = (V) n.value;
+                    n.value = value;
+                    size++;
+                    return oldValue;
+                } else if (n.next == null) {
+                    n.next = new Node<K, V>(hash, key, value, null);
+                    size++;
+                    return null;
                 }
             }
         }
+
+        return null;
+    }
+
+    protected V putForNullKey(V value) {
+        if (table[0] == null) {
+            table[0] = new Node(hash(null), null, value, null);
+            size++;
+        } else {
+            Object oldValue = table[0].value;
+            table[0].value = value;
+            size++;
+            return oldValue == null ? null : (V) oldValue;
+        }
+        return null;
+    }
+
+    protected int getIndex(K key) {
+        if (key == null)  return 0;
+
+        int hash = hash(key);
+        return ((table.length - 1) & hash);
     }
 
     public V get(K key) {
         if (size > 0) {
-            if (contains(key)) {
-                Node node = first;
-                while (node != null) {
-                    if (node.key.equals(key)) {
-                        return (V)node.value;
-                    } else {
-                        node = node.next;
+            if (key == null) {
+                return getForNullKey();
+            }
+
+            int i;
+            if (table[(i = getIndex(key))] != null) {
+                Node n; K k; int hash = hash(key);
+                for (n = table[i]; n != null; n = n.next) {
+                    if (key == (k = (K)n.key) && key.equals(k) && n.hash == hash) {
+                        return (V) n.value;
                     }
                 }
             }
@@ -76,59 +96,63 @@ public class MyHashMap<K, V> {
         return null;
     }
 
-    public void remove(K key) {
-        if (contains(key) && size > 0) {
-            if (first.key.equals(key)) {
-                first = first.next;
-                removeKey(key);
-                return;
+    protected V getForNullKey() {
+        return table[0] == null ? null : (V)table[0].value;
+    }
+
+    public V remove(K key) {
+        if (size > 0) {
+            if (key == null) {
+                return removeForNullKey();
             }
 
-            Node node = first;
-            while(node != null) {
-                if (node.next != null) {
-                    if (node.next.key.equals(key)) {
-                        Node toBeRemoved = node.next;
-                        node.next = toBeRemoved.next;
-                        break;
-                    } else {
-                        node = node.next;
+            Node<K, V> first, n; K k; int i = getIndex(key), hash = hash(key);
+            if ((first = table[i]) != null) {
+                if ((k = (K) first.key) == key || k.equals(key) && hash == first.hash) {
+                    table[i] = first.next;
+                    size--;
+                    return first.value == null ? null : (V)first.value;
+                }
+
+                if (first.next != null) {
+                    for (n = first.next; n != null; n = n.next, first = first.next) {
+                        if ((k = (K) n.key) == key || k.equals(key) && hash == n.hash) {
+                            first.next = n.next;
+                            size--;
+                            return n.value == null ? null : (V) n.value;
+                        }
                     }
-                } else {
-                    break;
                 }
             }
-
-            removeKey(key);
         }
+
+        return null;
     }
 
-    private void removeKey(K key) {
-        int index = 0;
-        for (Object o : keys) {
-            if (o.equals(key)) {
-                break;
+    private V removeForNullKey() {
+        Node<K, V> n = table[0]; V result;
+        if (n != null) {
+            result = n.value == null ? null : (V) n.value;
+
+            if (n.next == null) {
+                table[0] = null;
             } else {
-                index++;
+                table[0] = new Node<K, V>(hash(null), null, null, n.next);
             }
-        }
-        keys[index] = null;
 
-        if (0 <= index && index < size) {
-            for (int i = index; i < (size - 1); i++) {
-                keys[i] = keys[i + 1];
-            }
+            size--;
+            return result;
         }
-        size--;
+
+        return null;
     }
 
-    public boolean contains(K value) {
-        if (size > 0) {
-            for (Object key : keys) {
-                if (key != null) {
-                    if (key.equals(value)) {
-                        return true;
-                    }
+    public boolean containsKey(K key) {
+        Node<K, V> n; int i = getIndex(key);
+        if ((n = table[i]) != null) {
+            for (; n != null; n = n.next) {
+                if (key == n.key || key.equals(n.key)) {
+                    return true;
                 }
             }
         }
@@ -136,15 +160,18 @@ public class MyHashMap<K, V> {
         return false;
     }
 
+    static int hash(Object key) {
+        int h;
+        return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+    }
+
     public int size() {
         return size;
     }
 
     public void clear() {
-        first = null;
-        last = null;
         size = 0;
-        keys = new Object[DEFAULT_SIZE];
+        table = (Node<K, V>[])new Node[DEFAULT_INITIAL_CAPACITY];
     }
 
     private static class Node<K, V> {

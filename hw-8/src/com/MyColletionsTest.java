@@ -1,8 +1,5 @@
 package com;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-
 public class MyColletionsTest {
 
     public static void main(String[] args) {
@@ -145,55 +142,54 @@ public class MyColletionsTest {
         }
 
 
-        System.out.println("*** Testing MyLinkedList ends ***");
+        System.out.println("*** Testing MyLinkedList ends ***" + "\n\n");
     }
 
     void testMyHashMap() {
         System.out.println("*** Testing MyHashMap ***");
 
-        MyHashMap<Integer, String> myHashMap = new MyHashMap<>();
+        MyHashMap<String, String> myHashMap = new MyHashMap<>();
 
-        myHashMap.put(0, "1");
-        myHashMap.put(1, "2");
-        myHashMap.put(2, "3");
-        myHashMap.put(3, "4");
-        myHashMap.put(2, "4");
+        myHashMap.put("1", "one");
+        myHashMap.put("2", "two");
+        myHashMap.put("3", "three");
+        myHashMap.put("2", "four");
 
-        myHashMap.remove(1);
+        myHashMap.remove("1");
 
-        System.out.println(myHashMap.get(0));
-        System.out.println(myHashMap.get(1));
-        System.out.println(myHashMap.get(2));
-        System.out.println(myHashMap.get(3));
+        System.out.println(myHashMap.get("1")); //null
+        System.out.println(myHashMap.get("2")); //four
+        System.out.println(myHashMap.get("3")); //three
+        System.out.println(myHashMap.get("4")); //null
 
-        myHashMap.remove(3);
-
-        System.out.println();
-
-        System.out.println(myHashMap.get(0));
-        System.out.println(myHashMap.get(1));
-        System.out.println(myHashMap.get(2));
-        System.out.println(myHashMap.get(3));
-        System.out.println(myHashMap.get(9));
+        myHashMap.remove("3");
 
         System.out.println();
 
-        System.out.println(myHashMap.size());
+        System.out.println(myHashMap.get("1")); //null
+        System.out.println(myHashMap.get("2")); //four
+        System.out.println(myHashMap.get("3")); //null
+        System.out.println(myHashMap.get("4")); //null
+        System.out.println(myHashMap.get("9")); //null
+
+        System.out.println();
+
+        System.out.println(myHashMap.size());   //2
         myHashMap.clear();
-        System.out.println(myHashMap.size());
+        System.out.println(myHashMap.size());   //0
 
         System.out.println();
 
-        myHashMap.put(9, "9");
+        myHashMap.put("9", "nine");
 
-        System.out.println(myHashMap.get(9));
-        System.out.println(myHashMap.get(0));
-        System.out.println(myHashMap.get(1));
-        System.out.println(myHashMap.get(2));
-        System.out.println(myHashMap.get(3));
+        System.out.println(myHashMap.get("9")); //nine
+        System.out.println(myHashMap.get("1")); //null
+        System.out.println(myHashMap.get("2")); //null
+        System.out.println(myHashMap.get("3")); //null
+        System.out.println(myHashMap.get("4")); //null
 
-        myHashMap.remove(9);
-        System.out.println(myHashMap.size());
+        myHashMap.remove("9");
+        System.out.println(myHashMap.size());   //0
 
         System.out.println("*** Testing MyHashMap ends ***" + "\n\n");
     }
